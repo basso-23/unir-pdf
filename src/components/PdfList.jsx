@@ -1,36 +1,8 @@
 'use client';
 
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
 import PdfCard from './PdfCard';
 
-export default function PdfList({ pdfs, onReorder, onRemove }) {
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      onReorder(active.id, over.id);
-    }
-  };
-
+export default function PdfList({ pdfs, onMoveUp, onMoveDown }) {
   if (pdfs.length === 0) {
     return null;
   }
@@ -42,19 +14,18 @@ export default function PdfList({ pdfs, onReorder, onRemove }) {
         <span className="pdf-list-count">{pdfs.length} archivo{pdfs.length > 1 ? 's' : ''}</span>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={pdfs.map((p) => p.id)} strategy={verticalListSortingStrategy}>
-          <div className="pdf-list-items">
-            {pdfs.map((pdf) => (
-              <PdfCard key={pdf.id} pdf={pdf} onRemove={onRemove} />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+      <div className="pdf-list-items">
+        {pdfs.map((pdf, index) => (
+          <PdfCard
+            key={pdf.id}
+            pdf={pdf}
+            onMoveUp={() => onMoveUp(index)}
+            onMoveDown={() => onMoveDown(index)}
+            isFirst={index === 0}
+            isLast={index === pdfs.length - 1}
+          />
+        ))}
+      </div>
     </div>
   );
 }

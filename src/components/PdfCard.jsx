@@ -1,37 +1,13 @@
 'use client';
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { HiMenu, HiX, HiDocument } from 'react-icons/hi';
+import { HiChevronUp, HiChevronDown, HiDocument } from 'react-icons/hi';
 import { usePdfThumbnail } from '@/hooks/usePdfThumbnail';
 
-export default function PdfCard({ pdf, onRemove }) {
+export default function PdfCard({ pdf, onMoveUp, onMoveDown, isFirst, isLast }) {
   const { thumbnail, pageCount, isLoading } = usePdfThumbnail(pdf.file);
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: pdf.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`pdf-card ${isDragging ? 'pdf-card--dragging' : ''}`}
-    >
-      <div className="pdf-card-drag-handle" {...attributes} {...listeners}>
-        <HiMenu />
-      </div>
-
+    <div className="pdf-card">
       <div className="pdf-card-thumbnail">
         {isLoading ? (
           <div className="thumbnail-placeholder thumbnail-loading">
@@ -53,14 +29,24 @@ export default function PdfCard({ pdf, onRemove }) {
         </p>
       </div>
 
-      <div className="pdf-card-actions">
+      <div className="pdf-card-arrows">
         <button
           type="button"
-          className="pdf-card-remove-btn"
-          onClick={() => onRemove(pdf.id)}
-          aria-label="Eliminar PDF"
+          className="pdf-card-arrow-btn"
+          onClick={onMoveUp}
+          disabled={isFirst}
+          aria-label="Mover arriba"
         >
-          <HiX />
+          <HiChevronUp />
+        </button>
+        <button
+          type="button"
+          className="pdf-card-arrow-btn"
+          onClick={onMoveDown}
+          disabled={isLast}
+          aria-label="Mover abajo"
+        >
+          <HiChevronDown />
         </button>
       </div>
     </div>

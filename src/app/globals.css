@@ -1,11 +1,13 @@
+@import "tailwindcss";
+
 /* ==================== */
 /* Variables Globales   */
 /* ==================== */
 
 :root {
   /* Colores principales */
-  --color-primary: #0061FE;
-  --color-primary-hover: #0051D4;
+  --color-primary: #0061fe;
+  --color-primary-hover: #0051d4;
   --color-primary-light: rgba(0, 97, 254, 0.1);
   --color-primary-border: rgba(0, 97, 254, 0.5);
 
@@ -75,7 +77,7 @@ html {
 body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   min-height: 100dvh;
 }
@@ -235,33 +237,36 @@ body {
   transition: all var(--transition-normal);
 }
 
-.pdf-card:hover {
-  background-color: var(--color-background-card-hover);
-  border-color: var(--color-border-hover);
-}
-
 .pdf-card--dragging {
   opacity: 0.8;
   box-shadow: var(--shadow-lg);
   border-color: var(--color-primary);
 }
 
-.pdf-card-drag-handle {
+.pdf-card-arrows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pdf-card-arrow-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-sm);
-  color: var(--color-text-muted);
-  cursor: grab;
-  transition: color var(--transition-fast);
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary);
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 1.75rem;
 }
 
-.pdf-card-drag-handle:hover {
-  color: var(--color-text-secondary);
-}
-
-.pdf-card-drag-handle:active {
-  cursor: grabbing;
+.pdf-card-arrow-btn:disabled {
+  opacity: 10%;
+  pointer-events: none;
 }
 
 .pdf-card-thumbnail {
@@ -347,7 +352,8 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.4;
   }
   50% {

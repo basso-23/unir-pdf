@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { HiDocumentDuplicate, HiTrash } from 'react-icons/hi';
+import { HiDocumentDuplicate, HiTrash } from "react-icons/hi";
 
 export default function ActionButtons({
   onMerge,
@@ -31,7 +31,7 @@ export default function ActionButtons({
             <span className="btn-icon">
               <HiDocumentDuplicate />
             </span>
-            Unir PDFs
+            Unir documentos
           </>
         )}
       </button>

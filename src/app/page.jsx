@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import { useReducer, useCallback } from 'react';
-import { arrayMove } from '@dnd-kit/sortable';
-import DropZone from '@/components/DropZone';
-import PdfList from '@/components/PdfList';
-import ActionButtons from '@/components/ActionButtons';
-import { mergePdfs, downloadPdf } from '@/utils/pdfUtils';
-import { HiExclamationCircle } from 'react-icons/hi';
+import { useReducer, useCallback } from "react";
+import DropZone from "@/components/DropZone";
+import PdfList from "@/components/PdfList";
+import ActionButtons from "@/components/ActionButtons";
+import { mergePdfs, downloadPdf } from "@/utils/pdfUtils";
+import { HiExclamationCircle } from "react-icons/hi";
 
 const initialState = {
   pdfs: [],
@@ -16,7 +15,7 @@ const initialState = {
 
 function pdfReducer(state, action) {
   switch (action.type) {
-    case 'ADD_PDFS':
+    case "ADD_PDFS":
       return {
         ...state,
         pdfs: [
@@ -30,34 +29,48 @@ function pdfReducer(state, action) {
         error: null,
       };
 
-    case 'REMOVE_PDF':
+    case "REMOVE_PDF":
       return {
         ...state,
         pdfs: state.pdfs.filter((pdf) => pdf.id !== action.payload),
       };
 
-    case 'REORDER_PDFS':
-      const oldIndex = state.pdfs.findIndex((p) => p.id === action.payload.activeId);
-      const newIndex = state.pdfs.findIndex((p) => p.id === action.payload.overId);
-      return {
-        ...state,
-        pdfs: arrayMove(state.pdfs, oldIndex, newIndex),
-      };
+    case "MOVE_UP": {
+      const index = action.payload;
+      if (index <= 0) return state;
+      const newPdfs = [...state.pdfs];
+      [newPdfs[index - 1], newPdfs[index]] = [
+        newPdfs[index],
+        newPdfs[index - 1],
+      ];
+      return { ...state, pdfs: newPdfs };
+    }
 
-    case 'SET_MERGING':
+    case "MOVE_DOWN": {
+      const index = action.payload;
+      if (index >= state.pdfs.length - 1) return state;
+      const newPdfs = [...state.pdfs];
+      [newPdfs[index], newPdfs[index + 1]] = [
+        newPdfs[index + 1],
+        newPdfs[index],
+      ];
+      return { ...state, pdfs: newPdfs };
+    }
+
+    case "SET_MERGING":
       return {
         ...state,
         isMerging: action.payload,
       };
 
-    case 'SET_ERROR':
+    case "SET_ERROR":
       return {
         ...state,
         error: action.payload,
         isMerging: false,
       };
 
-    case 'CLEAR_ALL':
+    case "CLEAR_ALL":
       return initialState;
 
     default:
@@ -70,42 +83,46 @@ export default function Home() {
   const { pdfs, isMerging, error } = state;
 
   const handleFilesAdded = useCallback((files) => {
-    dispatch({ type: 'ADD_PDFS', payload: files });
+    dispatch({ type: "ADD_PDFS", payload: files });
   }, []);
 
   const handleRemove = useCallback((id) => {
-    dispatch({ type: 'REMOVE_PDF', payload: id });
+    dispatch({ type: "REMOVE_PDF", payload: id });
   }, []);
 
-  const handleReorder = useCallback((activeId, overId) => {
-    dispatch({ type: 'REORDER_PDFS', payload: { activeId, overId } });
+  const handleMoveUp = useCallback((index) => {
+    dispatch({ type: "MOVE_UP", payload: index });
+  }, []);
+
+  const handleMoveDown = useCallback((index) => {
+    dispatch({ type: "MOVE_DOWN", payload: index });
   }, []);
 
   const handleClear = useCallback(() => {
-    dispatch({ type: 'CLEAR_ALL' });
+    dispatch({ type: "CLEAR_ALL" });
   }, []);
 
   const handleMerge = useCallback(async () => {
     if (pdfs.length < 2) return;
 
-    dispatch({ type: 'SET_MERGING', payload: true });
+    dispatch({ type: "SET_MERGING", payload: true });
 
     try {
       const files = pdfs.map((pdf) => pdf.file);
       const mergedPdfBytes = await mergePdfs(files);
-      downloadPdf(mergedPdfBytes, 'documento-unido.pdf');
-      dispatch({ type: 'SET_MERGING', payload: false });
+      downloadPdf(mergedPdfBytes, "documento-unido.pdf");
+      dispatch({ type: "SET_MERGING", payload: false });
     } catch (err) {
       dispatch({
-        type: 'SET_ERROR',
-        payload: 'Error al unir los PDFs. Por favor, intenta de nuevo.',
+        type: "SET_ERROR",
+        payload: "Error al unir los PDFs. Por favor, intenta de nuevo.",
       });
     }
   }, [pdfs]);
 
   return (
     <div className="app-container">
-      <header className="app-header">
+      <header className="app-header hidden">
         <h1 className="app-header-title">Unir PDF</h1>
         <p className="app-header-subtitle">
           Combina multiples archivos PDF en uno solo
@@ -128,7 +145,11 @@ export default function Home() {
           </div>
         )}
 
-        <PdfList pdfs={pdfs} onReorder={handleReorder} onRemove={handleRemove} />
+        <PdfList
+          pdfs={pdfs}
+          onMoveUp={handleMoveUp}
+          onMoveDown={handleMoveDown}
+        />
 
         <ActionButtons
           onMerge={handleMerge}
